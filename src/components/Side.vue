@@ -1,10 +1,10 @@
 <template>
-<div>
-  <article v-if="hideInput">
-    <Paragraph v-for="paragraph in paragraphs" :data="data">{{ paragraph }}</Paragraph>
-  </article>
-  <textarea v-else @paste="handle"></textarea>
-</div>
+  <div>
+    <article v-if="hideInput">
+      <Paragraph v-for="paragraph in paragraphs" :data="data">{{ paragraph }}</Paragraph>
+    </article>
+    <textarea v-else @paste="handle"></textarea>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -36,7 +36,8 @@ div {
   flex: 1;
 }
 
-article, textarea {
+article,
+textarea {
   width: 100%;
   height: 100%;
   font-family: 'Gentium', 'Brill', monospace;

@@ -1,7 +1,7 @@
 <template>
-<div>
-  <Side v-for="selection in selections" :data="selection"></Side>
-</div>
+  <div>
+    <Side v-for="selection in selections" :data="selection"></Side>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -26,7 +26,6 @@ whenever(keys.space!, () => {
         allSpans.set(counter.value, []);
       }
       allSpans.get(counter.value)!.push(span);
-      console.log(allSpans)
     });
     spans.length = 0;
   });

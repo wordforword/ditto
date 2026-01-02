@@ -1,11 +1,13 @@
 <template>
-<p @mouseup="handle">
-  <slot></slot>
-</p>
+  <p @mouseup="handle">
+    <slot></slot>
+  </p>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{data: HTMLElement[]}>();
+import Span from './Span.vue';
+
+const props = defineProps<{ data: HTMLElement[] }>();
 
 function handle(e: MouseEvent) {
   const sel = window.getSelection();
@@ -13,7 +15,6 @@ function handle(e: MouseEvent) {
     return;
   }
   if ((e.target as HTMLElement).tagName !== `P`) {
-    console.log(e.target);
     return;
   }
   if (sel.isCollapsed) {
@@ -36,6 +37,4 @@ function handle(e: MouseEvent) {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
