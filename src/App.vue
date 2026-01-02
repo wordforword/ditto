@@ -1,14 +1,15 @@
+<template>
+<div>
+  <Side v-for="selection in selections" :data="selection"></Side>
+</div>
+</template>
+
 <script setup lang="ts">
+import { reactive } from 'vue';
 import Side from './components/Side.vue';
 
+const selections = reactive([[], []]);
 </script>
-
-<template>
-  <div>
-    <Side></Side>
-    <Side></Side>
-  </div>
-</template>
 
 <style scoped>
 div {

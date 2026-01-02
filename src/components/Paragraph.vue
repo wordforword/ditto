@@ -5,6 +5,8 @@
 </template>
 
 <script setup lang="ts">
+const props = defineProps<{data: Range[]}>();
+
 function handle() {
   const sel = window.getSelection();
   if (!sel) {
@@ -25,6 +27,8 @@ function handle() {
   range.deleteContents();
   range.insertNode(range.createContextualFragment(`<span style='text-decoration:underline;'>${s}</span>`));
   sel.empty();
+
+  props.data.push(range);
 }
 </script>
 
