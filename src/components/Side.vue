@@ -1,23 +1,28 @@
+<template>
+<div>
+  <article v-if="hideInput">
+    <Paragraph v-for="paragraph in paragraphs">{{ paragraph }}</Paragraph>
+  </article>
+  <textarea v-else @paste="handle"></textarea>
+</div>
+</template>
+
 <script setup lang="ts">
+import { ref, computed, type Ref } from 'vue';
+
+import Paragraph from './Paragraph.vue';
+
+const paragraphs: Ref<string[]> = ref([]);
+const hideInput = computed(() => !!paragraphs.value.length);
+
 function handle(c: ClipboardEvent) {
   if (!(c.target instanceof Element)) {
     return;
   }
-  const article = c.target.parentElement?.querySelector(`article`);
-  if (article) {
-    article.textContent = c.clipboardData?.getData(`text/plain`) ?? null;
-  }
-  article?.classList.remove(`invisible`);
-  c.target.classList.add(`invisible`);
+  const content = c.clipboardData?.getData(`text/plain`) ?? ``;
+  paragraphs.value = content.replace(/\r\n/g, `\n`).split(`\n\n`);
 }
 </script>
-
-<template>
-  <div>
-    <article class="invisible"></article>
-    <textarea @paste="handle"></textarea>
-  </div>
-</template>
 
 <style scoped>
 .invisible {
