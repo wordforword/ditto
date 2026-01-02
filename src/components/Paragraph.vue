@@ -5,11 +5,15 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{data: Range[]}>();
+const props = defineProps<{data: HTMLElement[]}>();
 
-function handle() {
+function handle(e: MouseEvent) {
   const sel = window.getSelection();
   if (!sel) {
+    return;
+  }
+  if ((e.target as HTMLElement).tagName !== `P`) {
+    console.log(e.target);
     return;
   }
   if (sel.isCollapsed) {
@@ -25,10 +29,10 @@ function handle() {
   span.textContent = s;
   const range = sel.getRangeAt(0);
   range.deleteContents();
-  range.insertNode(range.createContextualFragment(`<span style='text-decoration:underline;'>${s}</span>`));
+  range.insertNode(range.createContextualFragment(`<span style='text-decoration:underline;user-select:none;pointer-events:none'>${s}</span>`));
   sel.empty();
 
-  props.data.push(range);
+  props.data.push(span);
 }
 </script>
 

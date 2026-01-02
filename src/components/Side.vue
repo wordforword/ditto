@@ -39,7 +39,9 @@ div {
 article, textarea {
   width: 100%;
   height: 100%;
-  font-family: monospace;
+  font-family: 'Gentium', 'Brill', monospace;
+  font-style: italic;
+  text-align: left;
 }
 
 .read-the-docs {
