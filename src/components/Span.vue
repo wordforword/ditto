@@ -1,6 +1,5 @@
 <template>
-    <span :style="{ color, textDecoration: `underline`, pointerEvents: `none`, userSelect: `none` }">
-        <span v-if="data.group !== null" class="number">{{ data.group }}</span>
+    <span :title="data.group ?? undefined" :style="{ color, textDecoration: `underline`, userSelect: `none` }">
         {{ props.text }}
     </span>
 </template>
