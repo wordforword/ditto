@@ -5,9 +5,8 @@
 </template>
 
 <script setup lang="ts">
+import { render, h } from 'vue';
 import Span from './Span.vue';
-
-const props = defineProps<{ data: HTMLElement[] }>();
 
 function handle(e: MouseEvent) {
   const sel = window.getSelection();
@@ -25,15 +24,16 @@ function handle(e: MouseEvent) {
   while (/\s$/.test(sel.toString())) {
     sel.modify(`extend`, `backward`, `character`);
   }
-  const s = sel.toString();
+  const text = sel.toString();
   const span = document.createElement(`span`);
-  span.textContent = s;
   const range = sel.getRangeAt(0);
   range.deleteContents();
-  range.insertNode(range.createContextualFragment(`<span style='text-decoration:underline;user-select:none;pointer-events:none'>${s}</span>`));
+  const spanComponent = h(Span, { text });
+  render(spanComponent, span);
+  range.insertNode(span);
+  // think this has to go after the range.insertNode() on top of this comment
+  span.replaceWith(span.firstChild!);
   sel.empty();
-
-  props.data.push(span);
 }
 </script>
 

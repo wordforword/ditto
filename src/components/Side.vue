@@ -1,7 +1,7 @@
 <template>
   <div>
     <article v-if="hideInput">
-      <Paragraph v-for="paragraph in paragraphs" :data="data">{{ paragraph }}</Paragraph>
+      <Paragraph v-for="paragraph in paragraphs">{{ paragraph }}</Paragraph>
     </article>
     <textarea v-else @paste="handle"></textarea>
   </div>
@@ -11,8 +11,6 @@
 import { ref, computed, type Ref } from 'vue';
 
 import Paragraph from './Paragraph.vue';
-
-const props = defineProps([`data`])
 
 const paragraphs: Ref<string[]> = ref([]);
 const hideInput = computed(() => !!paragraphs.value.length);
