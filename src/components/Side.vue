@@ -1,7 +1,7 @@
 <template>
   <div>
     <article v-if="hideInput">
-      <Paragraph v-for="paragraph in paragraphs">{{ paragraph }}</Paragraph>
+      <Paragraph v-for="paragraph in paragraphs" :text="paragraph"></Paragraph>
     </article>
     <textarea v-else @paste="handle"></textarea>
   </div>

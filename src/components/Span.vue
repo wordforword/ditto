@@ -1,5 +1,10 @@
 <template>
-    <span :title="data.group ?? undefined" :style="{ color, textDecoration: `underline`, userSelect: `none` }">
+    <span
+        @click.right="clear"
+        @click.middle="setGroupNumber"
+        :title="data.group ?? undefined"
+        :style="{ color, textDecoration: `underline`, userSelect: `none` }"
+    >
         {{ props.text }}
     </span>
 </template>
@@ -19,6 +24,14 @@ const color = computed(() => {
     }
     return `rgb(${(group * 59) % 256}, ${(group * 23) % 256}, ${(group * 37) % 256})`;
 });
+
+function clear() {
+    
+}
+
+function setGroupNumber() {
+
+}
 
 </script>
 
