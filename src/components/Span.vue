@@ -1,10 +1,10 @@
 <template>
-    <span v-if="type === `span`" class="final" @click="doGroupNumber" @click.right.prevent="clear"
+    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear"
         :title="dumbToString(data?.group ?? undefined)"
         :style="{ color, textDecoration: `underline`, userSelect: `none` }">
         {{ props.text }}
     </span>
-    <span v-else @mouseup.prevent="$emit('selection')">
+    <span v-else @mouseup.left.prevent="$emit('selection')">
         {{ props.text }}
     </span>
 </template>
@@ -55,4 +55,4 @@ function clear() {
 
 </script>
 
-<style></style>
+<style scoped></style>

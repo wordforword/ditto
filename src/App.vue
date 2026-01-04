@@ -15,8 +15,7 @@ import FollowMouse from './components/FollowMouse.vue';
 const store = useGlobalStore();
 const keys = useMagicKeys();
 
-whenever(keys.space!, () => {
-  console.log('hi')
+whenever(keys.escape!, () => {
   store.finalizeGroup();
 });
 

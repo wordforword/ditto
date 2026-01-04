@@ -1,27 +1,32 @@
 <template>
   <div>
+    <button @click="copyAll">📋</button>
     <article v-if="hideInput">
-      <Paragraph v-for="paragraph in paragraphs" :text="paragraph"></Paragraph>
+      <Paragraph ref="dom-paras" v-for="paragraph in inputParagraphs" :text="paragraph"></Paragraph>
     </article>
-    <textarea v-else @paste="handle"></textarea>
+    <textarea v-else @paste="handleInitialPaste"></textarea>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type Ref } from 'vue';
+import { computed, ref, useTemplateRef, type Ref } from 'vue';
 
 import Paragraph from './Paragraph.vue';
 
-const paragraphs: Ref<string[]> = ref([]);
-const hideInput = computed(() => !!paragraphs.value.length);
+const inputParagraphs: Ref<string[]> = ref([]);
+const hideInput = computed(() => !!inputParagraphs.value.length);
+const domParagraphs = useTemplateRef(`dom-paras`);
 
-
-function handle(c: ClipboardEvent) {
+function handleInitialPaste(c: ClipboardEvent) {
   if (!(c.target instanceof Element)) {
     return;
   }
   const content = c.clipboardData?.getData(`text/plain`) ?? ``;
-  paragraphs.value = content.replace(/\r\n/g, `\n`).split(`\n\n`);
+  inputParagraphs.value = content.replace(/\r\n/g, `\n`).split(`\n\n`);
+}
+
+function copyAll() {
+  navigator.clipboard.writeText(domParagraphs.value?.map(p => p?.finalize()).join(``) ?? ``);
 }
 </script>
 
@@ -41,9 +46,20 @@ textarea {
   font-family: 'Gentium', 'Brill', monospace;
   font-style: italic;
   text-align: left;
+  /* for fuckass button */
+  margin-top: 2.5em;
 }
 
 .read-the-docs {
   color: #888;
+}
+
+button {
+  /* idk man */
+  width: 50%;
+  position: absolute;
+  height: 2em;
+  margin: 2px;
+  border: 1px solid gray;
 }
 </style>

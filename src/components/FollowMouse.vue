@@ -18,7 +18,6 @@ document.addEventListener(
     e => {
         mouseX.value = e.clientX;
         mouseY.value = e.clientY;
-        console.log(e.clientX, e.clientY, mouseX.value, mouseY.value)
     }
 );
 
@@ -26,8 +25,9 @@ document.addEventListener(
 
 <style scoped>
 span {
+    font-size: small;
     position: absolute;
     pointer-events: none;
-    transform: translate(10px, 10px);
+    transform: translate(-10px, 10px);
 }
 </style>
