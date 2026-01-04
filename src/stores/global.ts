@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 interface Whatever {
     text: string;
     self: number;
-    group: number | null;
+    groups: number[];
 }
 
 export const useGlobalStore = defineStore('global', () => {
@@ -12,16 +12,18 @@ export const useGlobalStore = defineStore('global', () => {
     const groupsByID = ref(new Map<number, Set<Ref<Whatever>>>);
     const spanID = computed(() => spanIDs.value.length);
     const groupID = ref(0);
-    const savedGroupNumber: Ref<number | null> = ref(null);
+    const savedGroupNumbers: Ref<number[]> = ref([]);
+    const savedGroupNumberIdx: Ref<number> = ref(0);
 
     return {
         spanIDs,
         groupsByID,
         spanID,
         groupID,
-        savedGroupNumber,
+        savedGroupNumbers,
+        savedGroupNumberIdx,
         addSpan(text: string): Ref<Whatever> {
-            const obj = ref({ text, self: spanID.value, group: null });
+            const obj = ref({ text, self: spanID.value, groups: [] });
             spanIDs.value.push(obj);
             return obj;
         },
@@ -29,20 +31,20 @@ export const useGlobalStore = defineStore('global', () => {
             groupsByID.value.set(groupID.value, new Set());
             for (let i = spanID.value - 1; i >= 0; i--) {
                 const span = (spanIDs.value[i])!;
-                if (span.value.group !== null) {
+                if (span.value.groups.length !== 0) {
                     break;
                 }
-                span.value.group = groupID.value;
+                span.value.groups.push(groupID.value);
                 groupsByID.value.get(groupID.value)!.add(span);
             }
             groupID.value++;
         },
         clearSpan(data: Ref<Whatever> | null) {
-            if (data === null || data.value.group === null) {
+            if (data === null || data.value.groups.length === 0) {
                 return;
             }
-            groupsByID.value.get(data.value.group)?.delete(data);
-            data.value.group = null;
+            data.value.groups.forEach(g => groupsByID.value.get(g)?.delete(data));
+            data.value.groups = [];
         },
     }
 });

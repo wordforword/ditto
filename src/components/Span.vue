@@ -1,6 +1,5 @@
 <template>
-    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear"
-        :title="dumbToString(data?.group ?? undefined)"
+    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear" :title="title"
         :style="{ color, textDecoration: `underline`, userSelect: `none` }">
         {{ props.text }}
     </span>
@@ -22,29 +21,35 @@ if (props.type === `span`) {
     data = store.addSpan(props.text);
 }
 const color = computed(() => {
-    if ((data?.value.group ?? null) === null) {
+    if (data === null || data.value.groups.length === 0) {
         return `#000`;
     }
-    const grp = data!.value.group!;
+    const grp = data.value.groups[0]!;
     return `rgb(${(grp * 59) % 256}, ${(grp * 23) % 256}, ${(grp * 37) % 256})`;
 });
-
-function dumbToString(s: number | undefined) {
-    if (s === undefined) {
-        return s;
+const title = computed(() => {
+    if (data === null) {
+        return undefined;
     }
-    return `${s}`;
-}
+    return [...data.value.groups].sort((a, b) => b - a).join(`,`);
+});
 
 function doGroupNumber() {
     if (data === null) {
         return;
     }
-    if (store.savedGroupNumber === null) {
-        store.savedGroupNumber = data.value.group;
+    if (store.savedGroupNumbers.length === 0) {
+        store.savedGroupNumbers = data.value.groups;
+        store.savedGroupNumberIdx = 0;
+    }
+    else if (store.savedGroupNumbers === data.value.groups) {
+        store.savedGroupNumberIdx = (store.savedGroupNumberIdx + 1) % store.savedGroupNumbers.length;
     } else {
-        data.value.group = store.savedGroupNumber;
-        store.savedGroupNumber = null;
+        const n = store.savedGroupNumbers[store.savedGroupNumberIdx];
+        if (n !== undefined) {
+            data.value.groups.push(n);
+        }
+        store.savedGroupNumbers = [];
     }
 }
 

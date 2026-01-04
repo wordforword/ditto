@@ -3,7 +3,7 @@
     <template v-for="{ type, text: t, id }, i in excerpts" :key="id">
       <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t"></Span>
     </template>
-    <button @click="copy">📋</button>
+    <button id="copy" @click="copy"></button>
   </p>
 </template>
 
@@ -80,21 +80,34 @@ function clear(index: number) {
     })
 }
 
+
 function finalize() {
-  // i feel like i should be doing this thru vue but that turned out feeling even hackier
+  // i feel like i should be doing this thru vue but that felt even hackier
+
   let finalCounter = 0;
   const groupToCounter = new Map<string, number>();
+  function _getCounter(group: string) {
+    if (!groupToCounter.has(group)) {
+      groupToCounter.set(group, finalCounter++)
+    }
+    return groupToCounter.get(group)!;
+  }
+
+  let lastTitle = null;
   const ret = [];
-  for (const n of p.value?.childNodes ?? []) {
-    if (n instanceof HTMLElement) {
-      if (n.title !== undefined && n.title !== `` && (+n.title) !== finalCounter) {
-        if (!groupToCounter.has(n.title)) {
-          groupToCounter.set(n.title, finalCounter++)
+  for (const node of p.value?.childNodes ?? []) {
+    if (node instanceof HTMLElement) {
+      if (node.title !== undefined && node.title !== `` && node.title !== lastTitle) {
+        const [firstNum, ...rest] = node.title.split(`,`).map(_getCounter).sort((a, b) => a - b);
+        ret.push(`[${firstNum!}`);
+        for (const num of rest) {
+          ret.push(`,${num}`);
         }
-        ret.push(`[${groupToCounter.get(n.title)}]`);
+        ret.push(`]`);
+        lastTitle = node.title;
       }
     }
-    ret.push(n.textContent);
+    ret.push(node.textContent);
   }
   return ret.join(``);
 }
@@ -110,5 +123,9 @@ button {
   padding: 3px;
   margin: 2px;
   border: 1px solid gray;
+}
+
+#copy::after {
+  content: "📋";
 }
 </style>

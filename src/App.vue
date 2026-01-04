@@ -16,6 +16,7 @@ const store = useGlobalStore();
 const keys = useMagicKeys();
 
 whenever(keys.escape!, () => {
+  store.savedGroupNumbers = [];
   store.finalizeGroup();
 });
 

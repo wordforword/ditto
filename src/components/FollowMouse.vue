@@ -1,6 +1,6 @@
 <template>
-    <span v-if="store.savedGroupNumber !== null" :style="{ left: `${mouseX}px`, top: `${mouseY}px` }">
-        {{ store.savedGroupNumber }}
+    <span v-if="store.savedGroupNumbers.length !== 0" :style="{ left: `${mouseX}px`, top: `${mouseY}px` }">
+        {{ store.savedGroupNumbers[store.savedGroupNumberIdx] }}
     </span>
 </template>
 
