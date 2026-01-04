@@ -1,10 +1,10 @@
 <template>
-    <span
-        @click.right="clear"
-        @click.middle="setGroupNumber"
-        :title="data.group ?? undefined"
-        :style="{ color, textDecoration: `underline`, userSelect: `none` }"
-    >
+    <span v-if="type === `span`" class="final" @click="doGroupNumber" @click.right.prevent="clear"
+        :title="dumbToString(data?.group ?? undefined)"
+        :style="{ color, textDecoration: `underline`, userSelect: `none` }">
+        {{ props.text }}
+    </span>
+    <span v-else @mouseup.prevent="$emit('selection')">
         {{ props.text }}
     </span>
 </template>
@@ -13,24 +13,44 @@
 import { computed } from 'vue';
 import { useGlobalStore } from '../stores/global';
 
-const props = defineProps<{ text: string }>();
+const props = defineProps<{ type: `text` | `span`, text: string }>();
+const emit = defineEmits([`clear`, `selection`])
 
 const store = useGlobalStore();
-const data = store.addSpan(props.text);
+let data: ReturnType<typeof store.addSpan> | null = null;
+if (props.type === `span`) {
+    data = store.addSpan(props.text);
+}
 const color = computed(() => {
-    const group = data.value.group;
-    if (group === null) {
+    if ((data?.value.group ?? null) === null) {
         return `#000`;
     }
-    return `rgb(${(group * 59) % 256}, ${(group * 23) % 256}, ${(group * 37) % 256})`;
+    const grp = data!.value.group!;
+    return `rgb(${(grp * 59) % 256}, ${(grp * 23) % 256}, ${(grp * 37) % 256})`;
 });
 
-function clear() {
-    
+function dumbToString(s: number | undefined) {
+    if (s === undefined) {
+        return s;
+    }
+    return `${s}`;
 }
 
-function setGroupNumber() {
+function doGroupNumber() {
+    if (data === null) {
+        return;
+    }
+    if (store.savedGroupNumber === null) {
+        store.savedGroupNumber = data.value.group;
+    } else {
+        data.value.group = store.savedGroupNumber;
+        store.savedGroupNumber = null;
+    }
+}
 
+function clear() {
+    store.clearSpan(data);
+    emit(`clear`);
 }
 
 </script>

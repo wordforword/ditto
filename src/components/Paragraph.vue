@@ -1,8 +1,7 @@
 <template>
-  <p @mouseup="handle">
-    <template v-for="{ text: t, type } in excerpts">
-      <Span v-if="type === `span`" :text="t"></Span>
-      <template v-else>{{ t }}</template>
+  <p>
+    <template v-for="{ type, text: t, id }, i in excerpts" :key="id">
+      <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t"></Span>
     </template>
   </p>
 </template>
@@ -14,58 +13,70 @@ import Span from './Span.vue';
 interface Excerpt {
   type: `span` | `text`;
   text: string;
-  node?: Node
+  id: number;
 }
 
 const props = defineProps<{ text: string }>();
 
+let keyCounter = 0;
 const excerpts: Ref<Excerpt[]> = ref([
   {
     type: `text`,
     text: props.text,
+    id: keyCounter++,
   }
 ]);
 
-function handle(e: MouseEvent) {
+function handleSelection(index: number) {
   const sel = window.getSelection();
-  if (!sel) {
+  if (!sel || !sel.focusNode || !sel.anchorNode) {
+    console.log(sel, sel?.focusNode, sel?.anchorNode);
     return;
   }
-  if ((e.target as HTMLElement).tagName !== `P`) {
+  if (sel.direction === `backward`) {
+    sel.setBaseAndExtent(sel.focusNode, sel.focusOffset, sel.anchorNode, sel.anchorOffset);
+  }
+  if (sel.anchorNode !== sel.focusNode) {
+    sel.empty();
     return;
   }
   if (sel.isCollapsed) {
+    const originalAnchorNode = sel.anchorNode;
     sel.modify(`move`, `forward`, `character`);
     sel.modify(`move`, `backward`, `word`);
     sel.modify(`extend`, `forward`, `word`);
+    if (sel.anchorNode !== sel.focusNode || sel.anchorNode !== originalAnchorNode) {
+      if (sel.anchorNode === null) {
+        console.log(`error: anchornode null oops!`);
+      }
+      sel.setBaseAndExtent(originalAnchorNode, 0, originalAnchorNode, originalAnchorNode.textContent?.length ?? 0);
+    }
   }
   while (/\s$/.test(sel.toString())) {
     sel.modify(`extend`, `backward`, `character`);
   }
-  const surroundingText = sel.anchorNode?.textContent;
-  if (!surroundingText) {
-    return;
-  }
-  const beginning = surroundingText.slice(0, sel.anchorOffset);
-  const ending = surroundingText.slice(sel.focusOffset);
-  const newExcerpts = [] as Excerpt[];
-  for (const node of sel.anchorNode.parentElement?.childNodes ?? []) {
-    if (node === sel.anchorNode) {
-      newExcerpts.push(
-        { type: `text`, text: beginning },
-        { type: `span`, text: sel.toString() },
-        { type: `text`, text: ending },
-      );
-      continue;
-    }
-    newExcerpts.push({
-      type: node instanceof HTMLSpanElement ? `span` : `text`,
-      text: node.textContent ?? ``,
-    });
-  }
-  excerpts.value = newExcerpts;
-  sel.empty();
+  const text = excerpts.value[index]!.text;
+  excerpts.value.splice(index, 1,
+    { type: `text`, text: text.slice(0, sel.anchorOffset), id: keyCounter++ },
+    { type: `span`, text: text.slice(sel.anchorOffset, sel.focusOffset), id: keyCounter++ },
+    { type: `text`, text: text.slice(sel.focusOffset), id: keyCounter++ },
+  );
 }
+
+function clear(index: number) {
+  // only called from type=span not type=text
+  excerpts.value.splice(
+    index - 1,
+    3,
+    {
+      type: `text`,
+      text: (excerpts.value[index - 1]?.text ?? ``)
+        + (excerpts.value[index]?.text ?? ``)
+        + (excerpts.value[index + 1]?.text ?? ``),
+      id: keyCounter++,
+    })
+}
+
 </script>
 
 <style scoped></style>

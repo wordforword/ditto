@@ -1,4 +1,5 @@
 <template>
+  <FollowMouse></FollowMouse>
   <div>
     <Side></Side>
     <Side></Side>
@@ -9,21 +10,14 @@
 import { whenever, useMagicKeys } from '@vueuse/core';
 import Side from './components/Side.vue';
 import { useGlobalStore } from './stores/global';
-import { watch } from 'vue';
+import FollowMouse from './components/FollowMouse.vue';
 
 const store = useGlobalStore();
 const keys = useMagicKeys();
+
 whenever(keys.space!, () => {
   console.log('hi')
   store.finalizeGroup();
-});
-
-watch(() => store.deletionQueue, v => {
-  for (const id of v) {
-    for (const span of store.groupsByID.get(id) ?? []) {
-      span.value.group = null;
-    }
-  }
 });
 
 </script>
