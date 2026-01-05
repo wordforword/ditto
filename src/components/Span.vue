@@ -12,13 +12,13 @@
 import { computed } from 'vue';
 import { useGlobalStore } from '../stores/global';
 
-const props = defineProps<{ type: `text` | `span`, text: string }>();
+const props = defineProps<{ type: `text` | `span`, text: string, initGroups: number[] }>();
 const emit = defineEmits([`clear`, `selection`])
 
 const store = useGlobalStore();
 let data: ReturnType<typeof store.addSpan> | null = null;
 if (props.type === `span`) {
-    data = store.addSpan(props.text);
+    data = store.addSpan(props.text, props.initGroups);
 }
 const color = computed(() => {
     if (data === null || data.value.groups.length === 0) {

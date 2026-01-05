@@ -18,6 +18,7 @@
       "ESNext",
       "DOM",
       "DOM.Iterable",
+      "ESNext.Regexp"
     ]
   },
   "include": [

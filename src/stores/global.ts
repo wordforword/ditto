@@ -7,6 +7,10 @@ interface Whatever {
     groups: number[];
 }
 
+function _regexpEscape(s: string) {
+    return s.replace(/[\^$\\.*+?()[\]{}|]/g, `\\$&`);
+}
+
 export const useGlobalStore = defineStore('global', () => {
     const spanIDs = ref([] as Ref<Whatever>[]);
     const groupsByID = ref(new Map<number, Set<Ref<Whatever>>>);
@@ -15,10 +19,14 @@ export const useGlobalStore = defineStore('global', () => {
     const savedGroupNumbers: Ref<number[]> = ref([]);
     const savedGroupNumberIdx: Ref<number> = ref(0);
 
-    const outputWidth = 80;
-    const outputOpenBracket = `[`;
-    const outputDelim = `,`;
-    const outputCloseBracket = `]`;
+    const outputWidth = ref(80);
+    const outputOpenBracket = ref(`[`);
+    const outputDelim = ref(`,`);
+    const outputCloseBracket = ref(`]`);
+
+    const escOpen = computed(() => _regexpEscape(outputOpenBracket.value));
+    const escDelim = computed(() => _regexpEscape(outputDelim.value));
+    const escClose = computed(() => _regexpEscape(outputCloseBracket.value));
 
     return {
         spanIDs,
@@ -31,8 +39,11 @@ export const useGlobalStore = defineStore('global', () => {
         outputOpenBracket,
         outputDelim,
         outputCloseBracket,
-        addSpan(text: string): Ref<Whatever> {
-            const obj = ref({ text, self: spanID.value, groups: [] });
+        escOpen,
+        escDelim,
+        escClose,
+        addSpan(text: string, groups: number[]): Ref<Whatever> {
+            const obj = ref({ text, self: spanID.value, groups });
             spanIDs.value.push(obj);
             return obj;
         },

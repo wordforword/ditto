@@ -1,7 +1,7 @@
 <template>
   <p ref="p">
-    <template v-for="{ type, text: t, id }, i in excerpts" :key="id">
-      <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t"></Span>
+    <template v-for="{ type, text: t, id, initGroups }, i in excerpts" :key="id">
+      <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t" :init-groups="initGroups"></Span>
     </template>
     <button id="copy" @click="copy"></button>
     <button id="edit" @click="edit"></button>
@@ -12,13 +12,16 @@
 import { ref, useTemplateRef, type Ref } from 'vue';
 import Span from './Span.vue';
 import type { Finalized } from '../types';
+import { useGlobalStore } from '../stores/global';
 
 interface Excerpt {
   type: `span` | `text`;
   text: string;
   id: number;
+  initGroups: number[];
 }
 
+const store = useGlobalStore();
 defineExpose({ finalize });
 const props = defineProps<{ text: string, parentIndex: number }>();
 const emit = defineEmits<{
@@ -27,13 +30,32 @@ const emit = defineEmits<{
 const p = useTemplateRef(`p`);
 
 let keyCounter = 0;
-const excerpts: Ref<Excerpt[]> = ref([
-  {
-    type: `text`,
-    text: props.text,
-    id: keyCounter++,
+const excerpts: Ref<Excerpt[]> = ref(initialize(props.text));
+
+function initialize(text: string): Excerpt[] {
+  const ret: Excerpt[] = [];
+  const pattern = new RegExp(`${store.escOpen}([\\d${store.escDelim}]+?)${store.escClose}`, `g`);
+  let current = 0;
+  let initGroups: number[] = [];
+  for (const match of text.matchAll(pattern)) {
+    console.log(match);
+    ret.push({
+      type: initGroups.length ? `span` : `text`,
+      text: text.slice(current, match.index),
+      id: keyCounter++,
+      initGroups,
+    });
+    initGroups = match[1]!.split(`,`).map(n => +n);
+    current = match.index + match[0].length;
   }
-]);
+  ret.push({
+    type: initGroups.length ? `span` : `text`,
+    text: text.slice(current),
+    id: keyCounter++,
+    initGroups,
+  })
+  return ret;
+}
 
 function handleSelection(index: number) {
   const sel = window.getSelection();
@@ -65,9 +87,9 @@ function handleSelection(index: number) {
   }
   const text = excerpts.value[index]!.text;
   excerpts.value.splice(index, 1,
-    { type: `text`, text: text.slice(0, sel.anchorOffset), id: keyCounter++ },
-    { type: `span`, text: text.slice(sel.anchorOffset, sel.focusOffset), id: keyCounter++ },
-    { type: `text`, text: text.slice(sel.focusOffset), id: keyCounter++ },
+    { type: `text`, text: text.slice(0, sel.anchorOffset), id: keyCounter++, initGroups: [] },
+    { type: `span`, text: text.slice(sel.anchorOffset, sel.focusOffset), id: keyCounter++, initGroups: [] },
+    { type: `text`, text: text.slice(sel.focusOffset), id: keyCounter++, initGroups: [] },
   );
 }
 
@@ -84,6 +106,7 @@ function clear(index: number) {
       type: `text`,
       text: backwardsText + (excerpts.value[index]?.text ?? ``) + forwardsText,
       id: keyCounter++,
+      initGroups: [],
     })
 }
 
