@@ -15,6 +15,11 @@ export const useGlobalStore = defineStore('global', () => {
     const savedGroupNumbers: Ref<number[]> = ref([]);
     const savedGroupNumberIdx: Ref<number> = ref(0);
 
+    const outputWidth = 80;
+    const outputOpenBracket = `[`;
+    const outputDelim = `,`;
+    const outputCloseBracket = `]`;
+
     return {
         spanIDs,
         groupsByID,
@@ -22,6 +27,10 @@ export const useGlobalStore = defineStore('global', () => {
         groupID,
         savedGroupNumbers,
         savedGroupNumberIdx,
+        outputWidth,
+        outputOpenBracket,
+        outputDelim,
+        outputCloseBracket,
         addSpan(text: string): Ref<Whatever> {
             const obj = ref({ text, self: spanID.value, groups: [] });
             spanIDs.value.push(obj);

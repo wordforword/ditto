@@ -2,7 +2,8 @@
   <div>
     <button @click="copyAll">📋</button>
     <article v-if="hideInput">
-      <Paragraph ref="dom-paras" v-for="paragraph in inputParagraphs" :text="paragraph"></Paragraph>
+      <Paragraph ref="dom-paras" v-for="paragraph, i in inputParagraphs" :parent-index="i"
+        @finalize="runs => finalize(runs, i)" :text="paragraph"></Paragraph>
     </article>
     <textarea v-else @paste="handleInitialPaste"></textarea>
   </div>
@@ -10,12 +11,17 @@
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, type Ref } from 'vue';
-
 import Paragraph from './Paragraph.vue';
+import type { Finalized } from '../types';
 
 const inputParagraphs: Ref<string[]> = ref([]);
-const hideInput = computed(() => !!inputParagraphs.value.length);
+const numParagraphs = computed(() => inputParagraphs.value.length)
+const hideInput = computed(() => numParagraphs.value !== 0);
 const domParagraphs = useTemplateRef(`dom-paras`);
+const emit = defineEmits<{
+  copy: [index: number | null]
+}>();
+defineExpose({ requestParagraph, numParagraphs });
 
 function handleInitialPaste(c: ClipboardEvent) {
   if (!(c.target instanceof Element)) {
@@ -25,8 +31,29 @@ function handleInitialPaste(c: ClipboardEvent) {
   inputParagraphs.value = content.replace(/\r\n/g, `\n`).split(`\n\n`);
 }
 
+function finalize(_nodes: Finalized[], i: number) {
+  // todo remove _nodes i guess, parent doesn't need it
+  emit(`copy`, i);
+}
+
+function requestParagraph(i: number) {
+  if (domParagraphs.value === null) {
+    return [];
+  }
+  let para = domParagraphs.value[i];
+  if ((para?.parentIndex ?? i) !== i) {
+    console.log(`had to do linear search for paragraph`, i)
+    para = domParagraphs.value?.find(p => p?.parentIndex === i);
+  }
+  if (para === null || para === undefined) {
+    console.log(`no paragraph`, i);
+    return [];
+  }
+  return para.finalize();
+}
+
 function copyAll() {
-  navigator.clipboard.writeText(domParagraphs.value?.map(p => p?.finalize()).join(``) ?? ``);
+  emit(`copy`, null);
 }
 </script>
 

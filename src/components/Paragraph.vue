@@ -4,12 +4,14 @@
       <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t"></Span>
     </template>
     <button id="copy" @click="copy"></button>
+    <button id="edit" @click="edit"></button>
   </p>
 </template>
 
 <script setup lang="ts">
 import { ref, useTemplateRef, type Ref } from 'vue';
 import Span from './Span.vue';
+import type { Finalized } from '../types';
 
 interface Excerpt {
   type: `span` | `text`;
@@ -17,8 +19,11 @@ interface Excerpt {
   id: number;
 }
 
-const props = defineProps<{ text: string }>();
 defineExpose({ finalize });
+const props = defineProps<{ text: string, parentIndex: number }>();
+const emit = defineEmits<{
+  finalize: [nodes: Finalized[]]
+}>();
 const p = useTemplateRef(`p`);
 
 let keyCounter = 0;
@@ -81,40 +86,21 @@ function clear(index: number) {
 }
 
 
-function finalize() {
+function finalize(): Finalized[] {
   // i feel like i should be doing this thru vue but that felt even hackier
-
-  let finalCounter = 0;
-  const groupToCounter = new Map<string, number>();
-  function _getCounter(group: string) {
-    if (!groupToCounter.has(group)) {
-      groupToCounter.set(group, finalCounter++)
-    }
-    return groupToCounter.get(group)!;
-  }
-
-  let lastTitle = null;
   const ret = [];
   for (const node of p.value?.childNodes ?? []) {
-    if (node instanceof HTMLElement) {
-      if (node.title !== undefined && node.title !== `` && node.title !== lastTitle) {
-        const [firstNum, ...rest] = node.title.split(`,`).map(_getCounter).sort((a, b) => a - b);
-        ret.push(`[${firstNum!}`);
-        for (const num of rest) {
-          ret.push(`,${num}`);
-        }
-        ret.push(`]`);
-        lastTitle = node.title;
-      }
-    }
-    ret.push(node.textContent);
+    const groups = node instanceof HTMLElement && node.title ? node.title.split(`,`).map(g => +g) : null;
+    ret.push({ groups, text: node.textContent ?? `` });
   }
-  return ret.join(``);
+  return ret;
 }
 
 function copy() {
-  navigator.clipboard.writeText(finalize());
+  emit(`finalize`, finalize());
 }
+
+function edit() { }
 
 </script>
 
@@ -127,5 +113,9 @@ button {
 
 #copy::after {
   content: "📋";
+}
+
+#edit::after {
+  content: "✏️";
 }
 </style>
