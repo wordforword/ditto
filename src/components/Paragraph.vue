@@ -38,13 +38,28 @@ function initialize(text: string): Excerpt[] {
   let current = 0;
   let initGroups: number[] = [];
   for (const match of text.matchAll(pattern)) {
-    console.log(match);
+    const slice = text.slice(current, match.index);
+    const [first, ...rest] = slice.split(/(?:\s|\n|\r\n)+/);
     ret.push({
       type: initGroups.length ? `span` : `text`,
-      text: text.slice(current, match.index),
+      text: first!,
       id: keyCounter++,
       initGroups,
     });
+    for (const word of rest) {
+      ret.push({
+        type: `text`,
+        text: ` `,
+        id: keyCounter++,
+        initGroups: [],
+      });
+      ret.push({
+        type: initGroups.length ? `span` : `text`,
+        text: word,
+        id: keyCounter++,
+        initGroups,
+      });
+    }
     initGroups = match[1]!.split(`,`).map(n => +n);
     current = match.index + match[0].length;
   }
