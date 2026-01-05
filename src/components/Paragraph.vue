@@ -73,14 +73,16 @@ function handleSelection(index: number) {
 
 function clear(index: number) {
   // only called from type=span not type=text
+  const backwards = excerpts.value[index - 1]?.type === `text`;
+  const forwards = excerpts.value[index + 1]?.type === `text`;
+  const backwardsText = backwards ? excerpts.value[index - 1]?.text : ``;
+  const forwardsText = forwards ? excerpts.value[index + 1]?.text : ``;
   excerpts.value.splice(
-    index - 1,
-    3,
+    index - (+backwards),
+    1 + (+backwards) + (+forwards),
     {
       type: `text`,
-      text: (excerpts.value[index - 1]?.text ?? ``)
-        + (excerpts.value[index]?.text ?? ``)
-        + (excerpts.value[index + 1]?.text ?? ``),
+      text: backwardsText + (excerpts.value[index]?.text ?? ``) + forwardsText,
       id: keyCounter++,
     })
 }
