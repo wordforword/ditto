@@ -1,11 +1,15 @@
 <template>
-    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear"
-        @click.middle.prevent="edit" :title="title" :style="{ color, textDecoration: `underline`, userSelect: `none` }">
-        {{ ownText }}
-    </span>
-    <span v-else @mouseup.left.prevent="$emit('selection')" @click.right.prevent="edit">
-        {{ ownText }}
-    </span>
+    <template v-if="!editing">
+        <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear"
+            @click.ctrl="editing = true" :title="title"
+            :style="{ color, textDecoration: `underline`, userSelect: `none` }">
+            {{ ownText }}
+        </span>
+        <span v-else @mouseup.left.prevent="$emit('selection')" @click.ctrl="editing = true">
+            {{ ownText }}
+        </span>
+    </template>
+    <textarea v-else v-model="ownText" @keydown.enter.prevent="editing = false" @blur="editing = false"></textarea>
 </template>
 
 <script setup lang="ts">
@@ -14,7 +18,11 @@ import { useGlobalStore } from '../stores/global';
 
 const props = defineProps<{ type: `text` | `span`, text: string, initGroups: number[] }>();
 const _ownText: Ref<string | null> = ref(null);
-const ownText = computed(() => _ownText.value ?? props.text)
+const ownText = computed({
+    get: () => _ownText.value ?? props.text,
+    set: v => { _ownText.value = v; },
+});
+let editing: Ref<boolean> = ref(false);
 const emit = defineEmits([`clear`, `selection`])
 
 const store = useGlobalStore();
@@ -60,10 +68,16 @@ function clear() {
     emit(`clear`);
 }
 
-function edit() {
-    _ownText.value = window.prompt(ownText.value) || _ownText.value;
-}
-
 </script>
 
-<style scoped></style>
+<style scoped>
+textarea {
+    width: 100%;
+    height: 100%;
+    font-family: 'Gentium', 'Brill', monospace;
+    font-style: italic;
+    text-align: left;
+    /* for fuckass button */
+    margin-top: 2.5em;
+}
+</style>
