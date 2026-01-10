@@ -19,7 +19,7 @@ export const useGlobalStore = defineStore('global', () => {
     const savedGroupNumbers: Ref<number[]> = ref([]);
     const savedGroupNumberIdx: Ref<number> = ref(0);
 
-    const outputWidth = ref(80);
+    const outputWidth = ref(0);
     const outputOpenBracket = ref(`\\iw{`);
     const outputDelim = ref(`,`);
     const outputCloseBracket = ref(`}`);

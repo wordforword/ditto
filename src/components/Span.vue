@@ -1,18 +1,20 @@
 <template>
-    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear" :title="title"
-        :style="{ color, textDecoration: `underline`, userSelect: `none` }">
-        {{ props.text }}
+    <span v-if="type === `span`" class="final" @click.left="doGroupNumber" @click.right.prevent="clear"
+        @click.middle.prevent="edit" :title="title" :style="{ color, textDecoration: `underline`, userSelect: `none` }">
+        {{ ownText }}
     </span>
-    <span v-else @mouseup.left.prevent="$emit('selection')">
-        {{ props.text }}
+    <span v-else @mouseup.left.prevent="$emit('selection')" @click.right.prevent="edit">
+        {{ ownText }}
     </span>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, type Ref } from 'vue';
 import { useGlobalStore } from '../stores/global';
 
 const props = defineProps<{ type: `text` | `span`, text: string, initGroups: number[] }>();
+const _ownText: Ref<string | null> = ref(null);
+const ownText = computed(() => _ownText.value ?? props.text)
 const emit = defineEmits([`clear`, `selection`])
 
 const store = useGlobalStore();
@@ -56,6 +58,10 @@ function doGroupNumber() {
 function clear() {
     store.clearSpan(data);
     emit(`clear`);
+}
+
+function edit() {
+    _ownText.value = window.prompt(ownText.value) || _ownText.value;
 }
 
 </script>

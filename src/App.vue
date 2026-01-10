@@ -5,7 +5,7 @@
       <input v-model="store.outputOpenBracket">
       <input v-model="store.outputDelim">
       <input v-model="store.outputCloseBracket">; width of
-      <input v-model="store.outputWidth">
+      <input type="number" v-model="store.outputWidth">
       chars
     </div>
     <div id="sides">
@@ -36,6 +36,9 @@ whenever(keys.escape!, () => {
 
 function fixWidth(str: string) {
   const width = store.outputWidth;
+  if (width === 0) {
+    return str;
+  }
   const ret = [];
   let remainder = str;
   while (/\s/.test(remainder)) {
@@ -54,7 +57,7 @@ function fixWidth(str: string) {
     remainder = remainder.slice(width - offset);
   }
   ret.push(remainder);
-  return ret.join(`\n`);
+  return ret.join(`\n`).replaceAll(/\n+/g, `\n`);
 }
 
 function groupUnchanged(a: Set<any>, b: any[] | null): boolean {

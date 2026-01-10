@@ -4,7 +4,7 @@
       <Span @selection="handleSelection(i)" @clear="clear(i)" :type="type" :text="t" :init-groups="initGroups"></Span>
     </template>
     <button id="copy" @click="copy"></button>
-    <button id="edit" @click="edit"></button>
+    <!-- <button id="edit" @click="edit"></button> -->
   </p>
 </template>
 
