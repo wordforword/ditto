@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 
 interface Whatever {
     text: string;
-    self: number;
     groups: number[];
 }
 
@@ -43,8 +42,9 @@ export const useGlobalStore = defineStore('global', () => {
         escDelim,
         escClose,
         addSpan(text: string, groups: number[]): Ref<Whatever> {
-            const obj = ref({ text, self: spanID.value, groups });
+            const obj = ref({ text, groups });
             spanIDs.value.push(obj);
+            groupID.value = Math.max(groupID.value, ...groups);
             return obj;
         },
         finalizeGroup() {
